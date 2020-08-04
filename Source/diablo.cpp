@@ -713,10 +713,8 @@ BOOL LeftMouseCmd(BOOL bShift)
 			NetSendCmdLocParam1(TRUE, invflag ? CMD_GOTOGETITEM : CMD_GOTOAGETITEM, cursmx, cursmy, pcursitem);
 		if (pcursmonst != -1)
 			NetSendCmdLocParam1(TRUE, CMD_TALKXY, cursmx, cursmy, pcursmonst);
-		if (pcursitem == -1 && pcursmonst == -1 && pcursplr == -1) {
-			track_lmb_loc(CMD_WALKXY, cursmx, cursmy);
+		if (pcursitem == -1 && pcursmonst == -1 && pcursplr == -1)
 			return TRUE;
-		}
 	} else {
 		bNear = abs(plr[myplr]._px - cursmx) < 2 && abs(plr[myplr]._py - cursmy) < 2;
 		if (pcursitem != -1 && pcurs == CURSOR_HAND && !bShift) {
@@ -725,15 +723,12 @@ BOOL LeftMouseCmd(BOOL bShift)
 			NetSendCmdLocParam1(TRUE, pcurs == CURSOR_DISARM ? CMD_DISARMXY : CMD_OPOBJXY, cursmx, cursmy, pcursobj);
 		} else if (plr[myplr]._pwtype == WT_RANGED) {
 			if (bShift) {
-				track_lmb_loc(CMD_RATTACKXY, cursmx, cursmy);
-				return TRUE;
+				NetSendCmdLoc(TRUE, CMD_RATTACKXY, cursmx, cursmy);
 			} else if (pcursmonst != -1) {
 				if (CanTalkToMonst(pcursmonst)) {
-					track_lmb_param1(CMD_ATTACKID, pcursmonst);
-					return TRUE;
+					NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
 				} else {
-					track_lmb_param1(CMD_RATTACKID, pcursmonst);
-					return TRUE;
+					NetSendCmdParam1(TRUE, CMD_RATTACKID, pcursmonst);
 				}
 			} else if (pcursplr != -1 && !FriendlyMode) {
 				NetSendCmdParam1(TRUE, CMD_RATTACKPID, pcursplr);
@@ -742,27 +737,21 @@ BOOL LeftMouseCmd(BOOL bShift)
 			if (bShift) {
 				if (pcursmonst != -1) {
 					if (CanTalkToMonst(pcursmonst)) {
-						track_lmb_param1(CMD_ATTACKID, pcursmonst);
-						return TRUE;
+						NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
 					} else {
-						track_lmb_loc(CMD_SATTACKXY, cursmx, cursmy);
-						return TRUE;
+						NetSendCmdLoc(TRUE, CMD_SATTACKXY, cursmx, cursmy);
 					}
 				} else {
-					track_lmb_loc(CMD_SATTACKXY, cursmx, cursmy);
-					return TRUE;
+					NetSendCmdLoc(TRUE, CMD_SATTACKXY, cursmx, cursmy);
 				}
 			} else if (pcursmonst != -1) {
-				track_lmb_param1(CMD_ATTACKID, pcursmonst);
-				return TRUE;
+				NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
 			} else if (pcursplr != -1 && !FriendlyMode) {
 				NetSendCmdParam1(TRUE, CMD_ATTACKPID, pcursplr);
 			}
 		}
-		if (!bShift && pcursitem == -1 && pcursobj == -1 && pcursmonst == -1 && pcursplr == -1) {
-			track_lmb_loc(CMD_WALKXY, cursmx, cursmy);
+		if (!bShift && pcursitem == -1 && pcursobj == -1 && pcursmonst == -1 && pcursplr == -1)
 			return TRUE;
-		}
 	}
 
 	return FALSE;
