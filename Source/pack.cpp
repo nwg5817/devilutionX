@@ -32,7 +32,7 @@ static void PackItem(PkItemStruct *id, ItemStruct *is)
 	}
 }
 
-void PackPlayer(PkPlayerStruct *pPack, int pnum, BOOL manashield, BOOL savefile)
+void PackPlayer(PkPlayerStruct *pPack, int pnum, BOOL manashield)
 {
 	PlayerStruct *pPlayer;
 	int i;
@@ -105,14 +105,6 @@ void PackPlayer(PkPlayerStruct *pPack, int pnum, BOOL manashield, BOOL savefile)
 		pPack->pManaShield = SwapLE32(pPlayer->pManaShield);
 	else
 		pPack->pManaShield = FALSE;
-
-	// MM
-	if (savefile) {
-		for (i = 0; i < 4; i++) {
-			pPack->wReserved[i] = pPlayer->_pSplHotKey[i];
-			pPack->wReserved[i + 4] = pPlayer->_pSplTHotKey[i];
-		}
-	}
 }
 
 /**
@@ -173,7 +165,7 @@ void VerifyGoldSeeds(PlayerStruct *pPlayer)
 	}
 }
 
-void UnPackPlayer(PkPlayerStruct *pPack, int pnum, BOOL killok, BOOL savefile)
+void UnPackPlayer(PkPlayerStruct *pPack, int pnum, BOOL killok)
 {
 	PlayerStruct *pPlayer;
 	int i;
@@ -264,18 +256,6 @@ void UnPackPlayer(PkPlayerStruct *pPack, int pnum, BOOL killok, BOOL savefile)
 	pPlayer->pDiabloKillLevel = SwapLE32(pPack->pDiabloKillLevel);
 	pPlayer->pBattleNet = pPack->pBattleNet;
 	pPlayer->pManaShield = SwapLE32(pPack->pManaShield);
-
-	// MM
-	if (savefile) {
-		for (i = 0; i < 4; i++) {
-			int spell = pPack->wReserved[i];
-			int spellT = pPack->wReserved[i + 4];
-			if (spell > 0 && spell < MAX_SPELLS && spellT >= 0 && spellT < RSPLTYPE_INVALID) {
-				pPlayer->_pSplHotKey[i] = spell;
-				pPlayer->_pSplTHotKey[i] = spellT;
-			}
-		}
-	}
 }
 
 DEVILUTION_END_NAMESPACE
