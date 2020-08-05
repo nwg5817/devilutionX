@@ -122,6 +122,30 @@ char *ClassStrTbl[] = {
 };
 BYTE fix[9] = { 0, 0, 3, 3, 3, 6, 6, 6, 8 }; /* PM_ChangeLightOff local type */
 
+void AutoPickGold(int pnum)
+{
+	PlayerStruct &player = plr[pnum];
+	if (currlevel == 0 || (gbMaxPlayers > 1 && gbActivePlayers > 1) || invflag)
+		return;
+	for (int orient = 0; orient < 9; ++orient) {
+		int row = player._px + pathxdir[orient];
+		int col = player._py + pathydir[orient];
+
+		int itemIndex = dItem[row][col] - 1;
+		if (itemIndex > -1) {
+			char *derp = (char *)&item;
+			ItemStruct *it = &(item[itemIndex]);
+			if (it->_itype == ITYPE_GOLD) {
+				NetSendCmdGItem(1u, CMD_REQUESTAGITEM, pnum, pnum, itemIndex);
+				item[itemIndex]._iRequest = 1;
+				//dItem[row][col] = 0;
+				PlaySFX(68);
+			}
+		}
+	}
+}
+
+
 void SetPlayerGPtrs(BYTE *pData, BYTE **pAnim)
 {
 	int i;
@@ -747,7 +771,7 @@ void NextPlrLevel(int pnum)
 
 	if (pnum == myplr) {
 		drawmanaflag = TRUE;
-		PlaySFX(IS_QUESTDN);
+		PlaySFX(IS_CAST3);
 	}
 
 	if (sgbControllerActive)
@@ -1151,7 +1175,7 @@ void PM_ChangeOffset(int pnum)
 	}
 
 	plr[pnum]._pVar8++;
-	if (currlevel == 0) {
+	if ((currlevel == 0) || (plr[pnum].pManaShield)) {
 		plr[pnum]._pVar8++;
 	}
 	px = plr[pnum]._pVar6 / 256;
@@ -1160,7 +1184,7 @@ void PM_ChangeOffset(int pnum)
 	//	plr[pnum]._pVar6 += plr[pnum]._pxvel;
 	//	plr[pnum]._pVar7 += plr[pnum]._pyvel;
 	// speedup run animation: //TODO bad place
-	if (currlevel == 0) {
+	if ((currlevel == 0) || (plr[pnum].pManaShield)) {
 		if (plr[pnum]._pAnimFrame % 2 == 1) {
 			plr[pnum]._pAnimFrame++;
 		}
@@ -1169,8 +1193,8 @@ void PM_ChangeOffset(int pnum)
 		}
 	}
 
-	plr[pnum]._pVar6 += (currlevel == 0 ? 2 : 1) * plr[pnum]._pxvel;
-	plr[pnum]._pVar7 += (currlevel == 0 ? 2 : 1) * plr[pnum]._pyvel;
+	plr[pnum]._pVar6 += (((currlevel == 0) || (plr[pnum].pManaShield)) ? 2 : 1) * plr[pnum]._pxvel;
+	plr[pnum]._pVar7 += (((currlevel == 0) || (plr[pnum].pManaShield)) ? 2 : 1) * plr[pnum]._pyvel;
 	plr[pnum]._pxoff = plr[pnum]._pVar6 / 256;
 	plr[pnum]._pyoff = plr[pnum]._pVar7 / 256;
 
@@ -3415,12 +3439,21 @@ void ProcessPlayers()
 					break;
 				case PM_WALK:
 					tplayer = PM_DoWalk(pnum);
+					if (pnum == myplr) {
+						AutoPickGold(myplr);
+					}
 					break;
 				case PM_WALK2:
 					tplayer = PM_DoWalk2(pnum);
+					if (pnum == myplr) {
+						AutoPickGold(myplr);
+					}					
 					break;
 				case PM_WALK3:
 					tplayer = PM_DoWalk3(pnum);
+					if (pnum == myplr) {
+						AutoPickGold(myplr);
+					}					
 					break;
 				case PM_ATTACK:
 					tplayer = PM_DoAttack(pnum);
