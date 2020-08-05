@@ -163,6 +163,7 @@ void GetObjectStr(int i);
 extern int bxadd[8];
 extern int byadd[8];
 extern char *shrinestrs[NUM_SHRINETYPE];
+extern char *shrinedesc[NUM_SHRINETYPE];
 extern char shrinemin[NUM_SHRINETYPE];
 extern char shrinemax[NUM_SHRINETYPE];
 extern BYTE shrineavail[NUM_SHRINETYPE];

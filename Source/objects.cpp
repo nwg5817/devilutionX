@@ -44,6 +44,36 @@ char *shrinestrs[NUM_SHRINETYPE] = {
 	"Glimmering",
 	"Tainted"
 };
+
+char *shrinedesc[NUM_SHRINETYPE] = {
+	"+5 to one attribute, -1 to others",
+	"-10 dura to one item, +10 to others",
+	"+2ac to items, -1 dmg to weapon",
+	"weapon damage +1",
+	"cast mana shield",
+	"recharge staves",
+	"repair all items",
+	"-1 to random spell level, +1 to others",
+	"refill chests",
+	"firebolt level +2",
+	"refill mana",
+	"cast mana shield",
+	"potions become rejuvenation",
+	"+2 to magic",
+	"get 2 potions",
+	"cast phasing",
+	"holy bolt level +2",
+	"fill inventory with gold",
+	"refill hp/mana for other players",
+	"+2 to dexterity",
+	"+2 to strength",
+	"+2 to vitality",
+	"reveal the map",
+	"holy bolt level +2",
+	"identify all items",
+	"+/- 1 to stats"
+};
+ 
 char shrinemin[NUM_SHRINETYPE] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -3106,6 +3136,7 @@ void OperateShrine(int pnum, int i, int sType)
 			plr[pnum]._pSplLvl[SPL_FIREBOLT]++;
 		if (plr[pnum]._pSplLvl[SPL_FIREBOLT] < 15)
 			plr[pnum]._pSplLvl[SPL_FIREBOLT]++;
+		/*
 		t = plr[pnum]._pMaxManaBase / 10;
 		v1 = plr[pnum]._pMana - plr[pnum]._pManaBase;
 		v2 = plr[pnum]._pMaxMana - plr[pnum]._pMaxManaBase;
@@ -3121,7 +3152,7 @@ void OperateShrine(int pnum, int i, int sType)
 		if (plr[pnum]._pMaxMana >> 6 <= 0) {
 			plr[pnum]._pMaxManaBase = 0;
 			plr[pnum]._pMaxMana = v2;
-		}
+		}*/
 		InitDiabloMsg(EMSG_SHRINE_FASCINATING);
 		break;
 	case SHRINE_CRYPTIC:
@@ -3239,6 +3270,7 @@ void OperateShrine(int pnum, int i, int sType)
 			plr[pnum]._pSplLvl[SPL_CBOLT]++;
 		if (plr[pnum]._pSplLvl[SPL_CBOLT] < 15)
 			plr[pnum]._pSplLvl[SPL_CBOLT]++;
+		/*
 		t = plr[pnum]._pMaxManaBase / 10;
 		v1 = plr[pnum]._pMana - plr[pnum]._pManaBase;
 		v2 = plr[pnum]._pMaxMana - plr[pnum]._pMaxManaBase;
@@ -3253,7 +3285,7 @@ void OperateShrine(int pnum, int i, int sType)
 		if (plr[pnum]._pMaxMana >> 6 <= 0) {
 			plr[pnum]._pMaxMana = v2;
 			plr[pnum]._pMaxManaBase = 0;
-		}
+		}*/
 		InitDiabloMsg(EMSG_SHRINE_SACRED);
 		break;
 	case SHRINE_SPIRITUAL:
@@ -3342,6 +3374,7 @@ void OperateShrine(int pnum, int i, int sType)
 			plr[pnum]._pSplLvl[SPL_HBOLT]++;
 		if (plr[pnum]._pSplLvl[SPL_HBOLT] < 15)
 			plr[pnum]._pSplLvl[SPL_HBOLT]++;
+		/*
 		t = plr[pnum]._pMaxManaBase / 10;
 		v1 = plr[pnum]._pMana - plr[pnum]._pManaBase;
 		v2 = plr[pnum]._pMaxMana - plr[pnum]._pMaxManaBase;
@@ -3356,7 +3389,7 @@ void OperateShrine(int pnum, int i, int sType)
 		if (plr[pnum]._pMaxMana >> 6 <= 0) {
 			plr[pnum]._pMaxMana = v2;
 			plr[pnum]._pMaxManaBase = 0;
-		}
+		}*/
 		InitDiabloMsg(EMSG_SHRINE_ORNATE);
 		break;
 	case SHRINE_GLIMMERING:
@@ -4381,6 +4414,7 @@ void GetObjectStr(int i)
 	case OBJ_SHRINER:
 		sprintf(tempstr, "%s Shrine", shrinestrs[object[i]._oVar1]);
 		strcpy(infostr, tempstr);
+		AddPanelString(shrinedesc[object[i]._oVar1], 1);
 		break;
 	case OBJ_BOOKCASEL:
 	case OBJ_BOOKCASER:
