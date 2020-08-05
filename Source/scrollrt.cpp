@@ -1430,7 +1430,7 @@ void DrawView(int StartX, int StartY)
 		gmenu_draw_pause();
 	}
 
-	if (pcursmonst != -1) {
+	if ((pcursmonst != -1) && (currlevel != 0)) {
 		DrawMonsterHealthBar(pcursmonst);
 	}
 	DrawControllerModifierHints();
