@@ -1247,129 +1247,170 @@ static void DrawGame(int x, int y)
 extern void DrawControllerModifierHints();
 void DrawMonsterHealthBar(int monsterID)
 {
-	static const int yPos = 180;
-	static const int width = 250;
-	static const int ScreenWidth = 640;
-	static const int Screen_LeftBorder = 64;
-	static const int xPos = (ScreenWidth) / 2 - Screen_LeftBorder;
-	static const int height = 25;
-	static const int xOffset = 0;
-	static const int yOffset = 0; // was 1
-	static const int borderWidth = 2;
-	static const int borderColors[] = { 242/*undead*/,232/*demon*/,182/*beast*/ };
-	static const int filledColor = 142; // optimum balance in bright red between dark and light
-	static const bool fillCorners = true;
-	static const int square = 10;
-	static const char* immuText = "IMMU: ";
-	static const char* resText = "RES: ";
-	static const char* vulnText = ":VULN";
-	static const int resSize = 3;
-	static const int resistColors[] = { 148, 140, 129 };
-	static const unsigned short immunes[] = { 0x8, 0x10, 0x20 };
-	static const unsigned short resists[] = { 0x1, 0x2, 0x4 };
-	static const bool cheat = false;
 
-	if (!monster[monsterID].MData) {
-		return;
+	MonsterStruct *mon = &monster[monsterID];
+	int specialMonster = 0;
+	if (mon->_uniqtype) {
+		specialMonster = 1;
 	}
-
-	MonsterStruct* mon = &monster[monsterID];
-	BOOL specialMonster = !!mon->_uniqtype;
 	int currentLife = mon->_mhitpoints;
 	int maxLife = mon->_mmaxhp;
+
 	if (currentLife > maxLife) {
 		maxLife = currentLife;
 	}
-	int borderColor =  borderColors[mon->MData->mMonstClass];
 	float FilledPercent = (float)currentLife / (float)maxLife;
-	unsigned short mres = mon->mMagicRes;
-	bool showHPNumbers = cheat || monstkills[mon->MType->mtype] >= 30;
-	bool showDamageModifiers = cheat || monstkills[mon->MType->mtype] >= 15;
+	const int yPos = 180;
+	const int width = 250;
+	int Screen_LeftBorder = 64;
+	const int xPos = (SCREEN_WIDTH) / 2 - Screen_LeftBorder;
+	const int height = 25;
+	const int xOffset = 0;
+	const int yOffset = 1;
+	int borderWidth = 2;
+	if (specialMonster == 1) {
+		borderWidth = 2;
+	} // 0 = normal, 1 = boss
+	int BorderColors[] = { 242 /*undead*/, 232 /*demon*/, 182 /*beast*/ };
+	int borderColor = BorderColors[mon->MData->mMonstClass]; //200; // pure golden, unique item style
+	int filledColor = 142;                                   // optimum balance in bright red between dark and light
+	bool fillCorners = true;
+	int square = 10;
 
-	if (showDamageModifiers) {
-		int resOffset = 0 + CalculateTextWidth(resText);
-		for (int k = 0; k < resSize; ++k) {
-			if (!(mres & resists[k])) {
-				continue;
+	/*
+	
+				if ( v7 & 7 )
+			{
+				strcpy(tempstr, "Resists : ");
+				if ( v7 & 1 )
+					strcat(tempstr, "Magic ");
+				if ( v7 & 2 )
+					strcat(tempstr, "Fire ");
+				if ( v7 & 4 )
+					strcat(tempstr, "Lightning ");
+				tempstr[strlen(tempstr) - 1] = '\0';
+				AddPanelString(tempstr, 1);
 			}
-			DrawSolidRectangle(xPos + resOffset, square, yPos + height + yOffset + borderWidth + 2, square, resistColors[k]);
+			if ( v7 & 0x38 )
+			{
+				strcpy(tempstr, "Immune : ");
+				if ( v7 & 8 )
+					strcat(tempstr, "Magic ");
+				if ( v7 & 0x10 )
+					strcat(tempstr, "Fire ");
+				if ( v7 & 0x20 )
+					strcat(tempstr, "Lightning ");
+					
+					*/
+
+	char *immuText = "IMMU: ";
+	char *resText = "RES: ";
+	char *vulnText = ":VULN";
+	int resSize = 3;
+	int resistColors[] = { 148, 140, 129 }; // { 170,140,129,148,242 };// {168, 216, 200, 242, 142 }; // arcane // fire // lightning // acid
+	unsigned short immunes[] = { 0x8, 0x10, 0x20 };
+	unsigned short resists[] = { 0x1, 0x2, 0x4 };
+	unsigned short mres = mon->mMagicRes;
+
+	int resOffset = 0 + CalculateTextWidth(resText);
+	for (int k = 0; k < resSize; ++k) {
+		if (mres & resists[k]) {
+			for (int j = 0; j < square; j++) {
+				for (int i = 0; i < square; i++) {
+					ColorPixel(xPos + i + resOffset, yPos + height + j + yOffset + borderWidth + 2, resistColors[k]);
+				}
+			}
 			resOffset += 12;
 		}
+	}
 
-		int vulOffset = width - square - CalculateTextWidth(vulnText) - 4;
-		for (int k = 0; k < resSize; ++k) {
-			if (mres & resists[k] || mres & immunes[k]) {
-				continue;
+	int vulOffset = width - square - CalculateTextWidth(vulnText) - 4;
+	for (int k = 0; k < resSize; ++k) {
+		if (mres & resists[k] || mres & immunes[k]) {
+		} else {
+			for (int j = 0; j < square; j++) {
+				for (int i = 0; i < square; i++) {
+					ColorPixel(xPos + i + vulOffset, yPos + height + j + yOffset + borderWidth + 2, resistColors[k]);
+				}
 			}
-			DrawSolidRectangle(xPos + vulOffset, square, yPos + height + yOffset + borderWidth + 2, square, resistColors[k]);
 			vulOffset -= 12;
 		}
 	}
 
-	DrawSolidRectangle(xPos, (int) ceil(FilledPercent * width), yPos, height, filledColor);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < (width * FilledPercent); i++) {
+			int tmpColor = filledColor;
+			ColorPixel(xPos + i, yPos + j, tmpColor);
+		}
+	}
 
-	static const int cornerMod = fillCorners ? borderWidth : 0;
-	static const int x0 = xPos - xOffset;
-	static const int dx = width + 2*xOffset + cornerMod;
-	static const int y0 = yPos - yOffset;
-	static const int dy = height + 2*yOffset + cornerMod;
-	DrawSolidRectangle(x0 - cornerMod, dx, yPos - yOffset - borderWidth, borderWidth, borderColor);
-	DrawSolidRectangle(x0            , dx, yPos + yOffset + height,      borderWidth, borderColor);
-	DrawSolidRectangle(xPos - xOffset - borderWidth, borderWidth, y0,             dy, borderColor);
-	DrawSolidRectangle(xPos + xOffset + width,       borderWidth, y0 - cornerMod, dy, borderColor);
+	for (int j = 0; j < borderWidth; j++) {
+		for (int i = -xOffset - (fillCorners ? borderWidth : 0); i < width + xOffset + (fillCorners ? borderWidth : 0); i++) {
+			ColorPixel(xPos + i, yPos + j - yOffset - borderWidth, borderColor);
+		}
+	}
+
+	for (int j = 0; j < borderWidth; j++) {
+		for (int i = -xOffset; i < width + xOffset + (fillCorners ? borderWidth : 0); i++) {
+			ColorPixel(xPos + i, yPos + j + yOffset + height, borderColor);
+		}
+	}
+
+	for (int j = -yOffset; j < height + yOffset + (fillCorners ? borderWidth : 0); j++) {
+		for (int i = 0; i < borderWidth; i++) {
+			ColorPixel(xPos + i - xOffset - borderWidth, yPos + j, borderColor);
+		}
+	}
+
+	for (int j = -yOffset; j < height + yOffset + (fillCorners ? borderWidth : 0); j++) {
+		for (int i = 0; i < borderWidth; i++) {
+			ColorPixel(xPos + i + xOffset + width, yPos + j, borderColor);
+		}
+	}
 
 	bool drawImmu = false;
-	if (showDamageModifiers) {
-		int immuOffset = 0 + CalculateTextWidth(immuText) - 5;
-		for (int k = 0; k < resSize; ++k) {
-			if (!(mres & immunes[k])) {
-				continue;
-			}
+	int immuOffset = 0 + CalculateTextWidth(immuText) - 5;
+	for (int k = 0; k < resSize; ++k) {
+		if (mres & immunes[k]) {
 			drawImmu = true;
-			DrawSolidRectangle(xPos + immuOffset, square, yPos + height + yOffset + borderWidth + 2 - 15, square, resistColors[k]);
+			for (int j = 0; j < square; j++) {
+				for (int i = 0; i < square; i++) {
+					ColorPixel(xPos + i + immuOffset, yPos + height + j + yOffset + borderWidth + 2 - 15, resistColors[k]);
+				}
+			}
 			immuOffset += 12;
 		}
 	}
 
-	static const int newX = xPos + Screen_LeftBorder;
-	static const int newY = yPos + height - 3;
+	int newX = xPos + Screen_LeftBorder;
+	int newY = yPos + height - 3;
 	std::stringstream name;
 	name << mon->mName;
 	if (mon->leader > 0) {
 		name << " (minion)";
 	}
 	int namecolor = COL_WHITE;
-	if (specialMonster) { // || name.str() == "The Dark Lord"
+	if (specialMonster == 1) {
 		namecolor = COL_GOLD;
-	}
-
-	if (!showHPNumbers) {
-		PrintGameStr(newX - CalculateTextWidth((char*)name.str().c_str()) / 2, 37, (char*)name.str().c_str(), namecolor);
-	} else {
-		static const int TWSlash = CalculateTextWidth("/");
-		PrintGameStr(newX - CalculateTextWidth((char*)name.str().c_str()) / 2, 30, (char*)name.str().c_str(), namecolor);
-		PrintGameStr(newX - TWSlash / 2, 43, "/", COL_WHITE);
-		std::stringstream current;
-		current << (currentLife >> 6);
-		std::stringstream max;
-		max << (maxLife >> 6);
-		PrintGameStr(newX + TWSlash, 43, (char*)max.str().c_str(), COL_WHITE);
-		PrintGameStr(newX - CalculateTextWidth((char*)current.str().c_str()) - TWSlash, 43, (char*)current.str().c_str(), COL_WHITE);
-	}
-	if (showDamageModifiers) {
-		PrintGameStr(newX - width / 2, 59, resText, COL_GOLD);
-	}
+	} //  || name.str() == "The Dark Lord"
+	PrintGameStr(newX - CalculateTextWidth((char *)name.str().c_str()) / 2, 30, (char *)name.str().c_str(), namecolor);
+	PrintGameStr(newX - CalculateTextWidth("/") / 2, 43, "/", COL_WHITE);
+	std::stringstream current;
+	current << (currentLife >> 6);
+	std::stringstream max;
+	max << (maxLife >> 6);
+	PrintGameStr(newX + CalculateTextWidth("/"), 43, (char *)max.str().c_str(), COL_WHITE);
+	PrintGameStr(newX - CalculateTextWidth((char *)current.str().c_str()) - CalculateTextWidth("/"), 43, (char *)current.str().c_str(), COL_WHITE);
+	PrintGameStr(newX - width / 2, 59, resText, COL_GOLD);
 
 	std::stringstream kills;
-	kills << "Kills: " << monstkills[mon->MType->mtype];
-	PrintGameStr(newX - CalculateTextWidth("kills")/2-30, 59, (char*)(kills.str().c_str()), COL_WHITE);
+	kills << "Kills:" << monstkills[mon->MType->mtype];
+	PrintGameStr(newX - CalculateTextWidth("kills") / 2 - 30, 59, (char *)(kills.str().c_str()), COL_WHITE);
 
-	if (drawImmu) {
-		PrintGameStr(newX - width / 2, 46-2, immuText, COL_GOLD);
+	if (drawImmu == true) {
+		PrintGameStr(newX - width / 2, 46, immuText, COL_GOLD);
 	}
-	if (showDamageModifiers) {
-		PrintGameStr(newX + width / 2 - CalculateTextWidth(vulnText), 59, vulnText, COL_RED);
-	}
+	PrintGameStr(newX + width / 2 - CalculateTextWidth(vulnText), 59, vulnText, COL_RED);
 }
 
 /**
@@ -1749,7 +1790,7 @@ void DrawAndBlit()
 		hgt = SCREEN_HEIGHT;
 	}
 	scrollrt_draw_cursor_item();
-
+	DrawXpBar();
 	DrawFPS();
 
 	unlock_buf(0);

@@ -1287,4 +1287,75 @@ void PlayInGameMovie(char *pszMovie)
 	force_redraw = 255;
 }
 
+int GetHeightDiff()
+{
+	return SCREEN_HEIGHT - 480;
+}
+int GetWidthDiff()
+{
+	return SCREEN_WIDTH - 640;
+}
+
+int WorkingWidth = SCREEN_WIDTH + 128;
+
+void ColorPixel(int x, int y, int color)
+{
+	char *WorkingSurface = (char *)gpBuffer;
+	WorkingSurface[y * WorkingWidth + x] = color;
+}
+
+void DrawXpBar()
+{
+	PlayerStruct *player = &plr[myplr];
+	int charLevel;
+	unsigned int curXp;
+	unsigned int prevXp;
+	unsigned int prevXpDelta;
+	unsigned int prevXpDelta_1;
+	int barSize = 306; // *ScreenWidth / 640;
+	int visibleBar = 0;
+	int offset = 3;
+	int barRows = 3; // *ScreenHeight / 480;
+	int yPos = 632 + GetHeightDiff();
+	int barColor = 242; /*242white, 142red, 200yellow, 182blue*/
+	int emptyBarColor = 0;
+	int frameColor = 242;
+
+	PrintGameStr(145 + GetWidthDiff() / 2, 476 + GetHeightDiff(), "XP", COL_WHITE);
+	charLevel = player->_pLevel;
+	if (charLevel != 50) {
+		curXp = ExpLvlsTbl[charLevel];
+		prevXp = ExpLvlsTbl[charLevel - 1];
+		prevXpDelta = curXp - prevXp;
+		prevXpDelta_1 = player->_pExperience - prevXp;
+		if (player->_pExperience >= prevXp) {
+			visibleBar = barSize * (unsigned __int64)prevXpDelta_1 / prevXpDelta;
+
+			for (int i = 0; i < visibleBar; ++i) {
+				for (int j = 0; j < barRows; ++j) {
+					ColorPixel((WorkingWidth - barSize) / 2 + i + offset, yPos - barRows / 2 + j, barColor);
+				}
+			}
+
+			for (int i = visibleBar; i < barSize; ++i) {
+				for (int j = 0; j < barRows; ++j) {
+					ColorPixel((WorkingWidth - barSize) / 2 + i + offset, yPos - barRows / 2 + j, emptyBarColor);
+				}
+			}
+			//draw frame
+			//horizontal
+			for (int i = -1; i <= barSize; ++i) {
+				ColorPixel((WorkingWidth - barSize) / 2 + i + offset, yPos - barRows / 2 - 1, frameColor);
+				ColorPixel((WorkingWidth - barSize) / 2 + i + offset, yPos + barRows / 2 + 1, frameColor);
+			}
+			//vertical
+			for (int i = 0; i < barRows; ++i) {
+				ColorPixel((768 - barSize) / 2 - 1 + offset, yPos - barRows / 2 + i, frameColor);
+				ColorPixel((768 - barSize) / 2 + barSize + offset, yPos - barRows / 2 + i, frameColor);
+			}
+			//draw frame
+		}
+	}
+}
+
 DEVILUTION_END_NAMESPACE

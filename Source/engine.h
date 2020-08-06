@@ -100,7 +100,8 @@ void Cl2BlitSafe(BYTE *pDecodeTo, BYTE *pRLEBytes, int nDataSize, int nWidth);
 void Cl2BlitOutlineSafe(BYTE *pDecodeTo, BYTE *pRLEBytes, int nDataSize, int nWidth, char col);
 void Cl2BlitLightSafe(BYTE *pDecodeTo, BYTE *pRLEBytes, int nDataSize, int nWidth, BYTE *pTable);
 void PlayInGameMovie(char *pszMovie);
-
+void DrawXpBar();
+void ColorPixel(int x, int y, int color);
 /* rdata */
 
 extern const int RndInc;
